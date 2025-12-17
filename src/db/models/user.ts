@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-    },
+    // _id: {
+    //   type: String,
+    // },
     tenantId: {
       type: String,
       required: true,
