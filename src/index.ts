@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import { envConfigs } from "./config/envConfig";
+import mainRouter from "./routes";
+import connectMongoDb from "./db";
 
 const app = express();
 
@@ -13,6 +15,9 @@ app.get("/", (req, res) => {
   });
 });
 
-app.listen(envConfigs.port, () => {
+app.use("/api", mainRouter);
+
+app.listen(envConfigs.port, async () => {
   console.log(`Server is listening on http://localhost:${envConfigs.port}`);
+  await connectMongoDb();
 });
