@@ -1,9 +1,12 @@
 import mongoose, { Types } from "mongoose";
 
 const MembershipSchema = new mongoose.Schema({
-
-  tenantId: { type: Types.ObjectId, required: true, index: true, ref: "Tenant" },
-  userId: { type: Types.ObjectId, required: true, index: true, ref: "User" },
+  tenantId: {
+    type: Types.ObjectId,
+    required: true,
+    ref: "Tenant",
+  },
+  userId: { type: Types.ObjectId, required: true, ref: "User" },
 
   role: {
     type: String,
@@ -11,7 +14,7 @@ const MembershipSchema = new mongoose.Schema({
     required: true,
   },
 
-  teams: [{ type: Types.ObjectId, ref: 'Team' }], 
+  teams: [{ type: Types.ObjectId, ref: "Team" }],
 
   status: {
     type: String,
@@ -20,7 +23,7 @@ const MembershipSchema = new mongoose.Schema({
   },
 
   createdAt: { type: Date, default: Date.now },
-  invitedBy: { type: String }, 
+  invitedBy: { type: Types.ObjectId },
 });
 
 MembershipSchema.index({ tenantId: 1, userId: 1 }, { unique: true });

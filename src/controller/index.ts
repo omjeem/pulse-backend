@@ -1,7 +1,9 @@
+import tenant from "./controllers/tenant";
 import user from "./controllers/user";
 
 const controllers = {
-    user
+    user,
+    tenant
 }
 
 export default controllers

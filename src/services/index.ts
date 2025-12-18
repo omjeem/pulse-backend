@@ -1,9 +1,11 @@
 import jwtService from "./auth/jwt";
+import tenant from "./db/tenant";
 import user from "./db/user";
 
 const services = {
   user,
-  jwtService
+  jwtService,
+  tenant
 };
 
 export default services;
