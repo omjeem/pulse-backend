@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { errorResponse, successResponse } from "../config/response";
-import Constants from "../config/constants";
-import services from "../services";
+import { errorResponse, successResponse } from "../../config/response";
+import Constants from "../../config/constants";
+import services from "../../services";
 
 const create = async (req: Request, res: Response) => {
   try {
@@ -40,14 +40,24 @@ const login = async (req: Request, res: Response) => {
     return errorResponse(
       res,
       error.message,
-      Constants.STATUS_CODES.UNAUTHORISED
+      Constants.STATUS_CODES.UNAUTHORIZED
     );
   }
 };
 
-const userController = {
+const profileDetails = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user.userId;
+    const userData = await services.user.findByUserId(userId);
+    return successResponse(res, "User profile fetched successfully", userData);
+  } catch (error: any) {
+    return errorResponse(res, error.message);
+  }
+};
+const user = {
   create,
   login,
+  profileDetails
 };
 
-export default userController;
+export default user;

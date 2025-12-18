@@ -1,6 +1,8 @@
+import { Types } from "mongoose";
+
 export interface UserTokenPayload {
   user: {
-    userId: string;
+    userId: Types.ObjectId;
     email: string;
   };
 }

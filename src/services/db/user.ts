@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import UserModal from "../../db/models/user";
 
 const createUser = async (name: string, email: string, password: string) => {
@@ -12,9 +13,14 @@ const findByEmail = async (email: string) => {
   return await UserModal.findOne({ email });
 };
 
+const findByUserId = async (userId: Types.ObjectId) => {
+  return await UserModal.findById(userId).select("_id name email createdAt");
+};
+
 const user = {
   createUser,
   findByEmail,
+  findByUserId
 };
 
 export default user;

@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { envConfigs } from "./config/envConfig";
-import mainRouter from "./routes";
+import mainRouter from "./router";
 import connectMongoDb from "./db";
 
 const app = express();

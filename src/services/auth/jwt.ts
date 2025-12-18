@@ -54,7 +54,6 @@ const verifyPassword = (
   hashedPassword: string
 ) => {
   const newHash = hashPassword(plainPassword, email);
-  console.log({ plainPassword, email, hashedPassword, newHash });
   return newHash === hashedPassword;
 };
 

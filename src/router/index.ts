@@ -1,6 +1,6 @@
 import express from "express";
-import userRouter from "./user";
-import videoRouter from "./video";
+import userRouter from "./routes/user";
+import videoRouter from "./routes/video";
 
 const mainRouter = express.Router();
 

@@ -12,7 +12,7 @@ const connectMongoDb = async () => {
     await mongoose.connect(MONGO_URI, {
       dbName: "Pulse",
       autoIndex: true, 
-      serverSelectionTimeoutMS: 5000,
+      // serverSelectionTimeoutMS: 5000,
     });
 
     console.log("MongoDB connected Successfully");
