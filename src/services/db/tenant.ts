@@ -48,14 +48,22 @@ const createNew = async (
 
 const getAllUserTenant = async (userId: Types.ObjectId) => {
   return await MembershipModal.find({ userId }).populate({
-      path: "tenantId",
-      select: "_id name slug metadata createdAt",
-    });
+    path: "tenantId",
+    select: "_id name slug metadata createdAt",
+  });
+};
+
+const isUserBelongToTenant = async (
+  userId: Types.ObjectId,
+  tenantId: Types.ObjectId
+) => {
+  return await MembershipModal.find({ tenantId, userId });
 };
 
 const tenant = {
   createNew,
-  getAllUserTenant
+  getAllUserTenant,
+  isUserBelongToTenant,
 };
 
 export default tenant;
