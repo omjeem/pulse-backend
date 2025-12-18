@@ -1,50 +1,20 @@
 import mongoose from "mongoose";
 
-const UserSchema = new mongoose.Schema(
-  {
-    // _id: {
-    //   type: String,
-    // },
-    tenantId: {
-      type: String,
-      required: true,
-      index: true,
-    },
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      lowercase: true,
-      index: true,
-    },
-    passwordHash: {
-      type: String,
-      required: true,
-    },
-    role: {
-      type: String,
-      enum: ["viewer", "editor", "admin"],
-      default: "viewer",
-      index: true,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    lastLoginAt: {
-      type: Date,
-    },
+const UserSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, index: true, lowercase: true },
+  password: { type: String },
+  isActive: { type: Boolean, default: true },
+  profile: {
+    avatarUrl: String,
+    bio: String,
   },
-  {
-    timestamps: true,
-  }
-);
+  lastLoginAt: Date,
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: Date,
+});
 
-UserSchema.index({ tenantId: 1, email: 1 }, { unique: true });
-const UserModel = mongoose.model("User", UserSchema);
+UserSchema.index({ email: 1 }, { unique: true });
 
-export default UserModel;
+const UserModal = mongoose.model("User", UserSchema);
+export default UserModal;
