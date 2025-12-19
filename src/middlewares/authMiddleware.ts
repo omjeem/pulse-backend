@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { errorResponse } from "../config/response";
 import Constants from "../config/constants";
 import services from "../services";
+import { ensureUploadDirs } from "../config/ensureUploadDir";
 
 export const authMiddleware = async (
   req: Request,
@@ -29,6 +30,7 @@ export const authMiddleware = async (
     req.user = {
       ...jwtData.data.user,
     };
+    ensureUploadDirs()
     next();
   } catch (error: any) {
     return errorResponse(

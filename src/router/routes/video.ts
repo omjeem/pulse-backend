@@ -14,6 +14,12 @@ videoRouter.post(
   controllers.video.uploadInChunk
 );
 
+videoRouter.post(
+  "/upload/frames",
+  upload.array("frames"),
+  controllers.video.framesAnalysis
+);
+
 videoRouter.post("/upload/complete", controllers.video.completeUpload);
 
 export default videoRouter;

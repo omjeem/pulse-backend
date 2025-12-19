@@ -5,7 +5,6 @@ import fs from "fs";
 import fsp from "fs/promises";
 import path from "path";
 import Constants from "../../config/constants";
-import { normalizeMp4Video } from "../../config/normaliseMp4";
 
 const initiateDownload = async (req: Request, res: Response) => {
   try {
@@ -29,7 +28,7 @@ const initiateDownload = async (req: Request, res: Response) => {
     };
 
     const videoInit = await services.video.initiateVideoUpload(videoObj);
-    
+
     return successResponse(
       res,
       "Video download initiate successfully",
@@ -121,10 +120,31 @@ export const completeUpload = async (req: Request, res: Response) => {
   }
 };
 
+const framesAnalysis = async (req: Request, res: Response) => {
+  try {
+    const body = req.body;
+    const files: any = req.files;
+    const { videoId } = body;
+    const framesPath = files?.map((f: any) => f.path);
+    const framesModeration = await services.moderation.frameModeration(
+      framesPath
+    );
+    console.dir({ framesModeration }, { depth: null });
+    return res.json({
+      message: "ok",
+      framesModeration,
+    });
+  } catch (error: any) {
+    console.log("Error in frame analysis", error);
+    return errorResponse(res, error.message);
+  }
+};
+
 const video = {
   initiateDownload,
   uploadInChunk,
   completeUpload,
+  framesAnalysis,
 };
 
 export default video;
