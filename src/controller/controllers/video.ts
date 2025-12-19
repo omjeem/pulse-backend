@@ -102,21 +102,20 @@ export const completeUpload = async (req: Request, res: Response) => {
       writeStream.end();
     });
 
-    // await Promise.all(
-    //   parts.map((p) => fsp.unlink(path.join(Constants.TEMP_DIR, p)))
-    // );
+    await Promise.all(
+      parts.map((p) => fsp.unlink(path.join(Constants.TEMP_DIR, p)))
+    );
 
     const stats = await fsp.stat(finalPath);
     console.log({ stats, finalPath });
 
-    return res.json({
-      ok: true,
+    return successResponse(res, "Video Clubbed Successfully", {
       filePath: finalPath,
       size: stats.size,
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
-    return res.status(500).json({ ok: false });
+    return errorResponse(res, err.message);
   }
 };
 
@@ -129,7 +128,7 @@ const framesAnalysis = async (req: Request, res: Response) => {
     const framesModeration = await services.moderation.frameModeration(
       framesPath
     );
-    console.dir({ framesModeration }, { depth: null });
+    console.log({ framesModeration });
     return res.json({
       message: "ok",
       framesModeration,

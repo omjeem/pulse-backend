@@ -5,7 +5,6 @@ const dirs = [
   path.resolve(process.cwd(), "dist_uploads"),
   path.resolve(process.cwd(), "dist_uploads/tmp"),
   path.resolve(process.cwd(), "dist_uploads/videos"),
-  path.resolve(process.cwd(), "dist_uploads/frames"),
 ];
 
 export function ensureUploadDirs() {

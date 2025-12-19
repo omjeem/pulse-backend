@@ -8,7 +8,6 @@ const Constants = {
   },
   TEMP_DIR: path.resolve(process.cwd(), "dist_uploads/tmp"),
   FINAL_DIR: path.resolve(process.cwd(), "dist_uploads/videos"),
-  FRAMES_DIR: path.resolve(process.cwd(), "dist_uploads/frames"),
 };
 
 export default Constants;
