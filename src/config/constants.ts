@@ -8,6 +8,15 @@ const Constants = {
   },
   TEMP_DIR: path.resolve(process.cwd(), "dist_uploads/tmp"),
   FINAL_DIR: path.resolve(process.cwd(), "dist_uploads/videos"),
+  EVENTS : {
+    initateDownload : "video.initate.download",
+    chunkUpload : "video.chunk.upload",
+    clubbingStart : "video.clubbing.start",
+    clubbingComplete : "video.clubbing.complete",
+    frameAnalysis : "video.frames.analysis.start",
+    frameAnalysisProgress : "video.frames.analysis.progress",
+    frameAnalysisComplete : "video.frames.analysis.complete"
+  }
 };
 
 export default Constants;

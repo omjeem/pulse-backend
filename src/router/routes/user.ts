@@ -4,8 +4,8 @@ import { authMiddleware } from "../../middlewares/authMiddleware";
 
 const userRouter = express.Router();
 
-userRouter.post("/", controllers.user.create);
-userRouter.post("/login", controllers.user.login);
+userRouter.post("/signup", controllers.user.create);
+userRouter.post("/signin", controllers.user.login);
 userRouter.get("/", authMiddleware, controllers.user.profileDetails);
 
 export default userRouter;

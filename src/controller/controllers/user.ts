@@ -8,9 +8,15 @@ const create = async (req: Request, res: Response) => {
     const { name, email, password } = req.body;
     const hashedPassword = services.jwtService.hashPassword(password, email);
     const user = await services.user.createUser(name, email, hashedPassword);
-    return successResponse(res, "User created Successfully", user);
+    const token = await services.jwtService.generateJwt(email, user._id);
+    return successResponse(res, "User created Successfully", { token });
   } catch (error: any) {
-    return errorResponse(res, error.message);
+    console.log({error})
+    let message = error.message
+    if(error.code === 11000){
+      message = "User with this email already registered! please try with different one"
+    }
+    return errorResponse(res, message);
   }
 };
 
@@ -57,7 +63,7 @@ const profileDetails = async (req: Request, res: Response) => {
 const user = {
   create,
   login,
-  profileDetails
+  profileDetails,
 };
 
 export default user;

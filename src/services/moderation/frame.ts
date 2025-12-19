@@ -3,6 +3,8 @@ import * as tf from "@tensorflow/tfjs-node";
 import * as nsfw from "nsfwjs";
 import Tesseract from "tesseract.js";
 import { Filter } from "bad-words";
+import { emitToRoom } from "../../socket";
+import Constants from "../../config/constants";
 
 const profanity = new Filter();
 
@@ -18,11 +20,11 @@ async function ensureModel() {
 type FrameResult = {
   frame: string;
   unsafeProb: number;
-  severityScore: number; 
+  severityScore: number;
   ocrText: string;
   ocrFlag: boolean;
-  ocrScore: number; 
-  totalFrameScore: number; 
+  ocrScore: number;
+  totalFrameScore: number;
 };
 
 type ModerationOutcome = {
@@ -81,7 +83,8 @@ function isMeaningfulText(s: string) {
 }
 
 export async function frameModeration(
-  framePaths: string[]
+  framePaths: string[],
+  videoId: string
 ): Promise<ModerationOutcome> {
   if (!framePaths || framePaths.length === 0) {
     return {
@@ -104,13 +107,24 @@ export async function frameModeration(
   const model = await ensureModel();
   const frameResults: FrameResult[] = [];
 
-  const HIGH_SEVERITY_PROB = 0.95; 
-  const AVERAGE_SCORE_THRESHOLD = 25; 
-  const FLAGGED_FRAME_PROB = 0.6; 
-  const RATIO_THRESHOLD = 0.05; 
+  const HIGH_SEVERITY_PROB = 0.95;
+  const AVERAGE_SCORE_THRESHOLD = 25;
+  const FLAGGED_FRAME_PROB = 0.6;
+  const RATIO_THRESHOLD = 0.05;
   const OCR_FRAME_BONUS = 30;
-
+  const EMIT_AFTER = Math.ceil(framePaths.length / 20);
+  let i = 0;
+  let nextEmit = EMIT_AFTER;
   for (const framePath of framePaths) {
+    i++;
+    if (i === nextEmit) {
+      emitToRoom("", Constants.EVENTS.frameAnalysisProgress, {
+        totalFrames: framePaths.length,
+        videoId,
+        percentage: ((i / framePaths.length) * 100).toFixed(2),
+      });
+      nextEmit += EMIT_AFTER;
+    }
     try {
       const buf = await fs.promises.readFile(framePath);
       const tensor = tf.node.decodeImage(buf, 3) as tf.Tensor3D;
@@ -169,13 +183,19 @@ export async function frameModeration(
     }
   }
 
+  emitToRoom("", Constants.EVENTS.frameAnalysisProgress, {
+    totalFrames: framePaths.length,
+    videoId,
+    percentage: 100,
+  });
+
   framePaths.forEach((path) => fs.unlinkSync(path));
 
   const totalFrames = frameResults.length;
   const totalVideoScore = frameResults.reduce(
     (s, f) => s + f.totalFrameScore,
     0
-  ); 
+  );
   const avgScore = totalVideoScore / totalFrames;
 
   const flaggedFrames = frameResults.filter(
@@ -197,7 +217,7 @@ export async function frameModeration(
       avgScore,
       totalVideoScore,
       totalFrames,
-      frameResults,
+      frameResults: [],
       metrics: {
         flaggedFrames,
         highSeverityFrames,
@@ -215,7 +235,7 @@ export async function frameModeration(
       avgScore,
       totalVideoScore,
       totalFrames,
-      frameResults,
+      frameResults: [],
       metrics: {
         flaggedFrames,
         highSeverityFrames,
@@ -233,7 +253,7 @@ export async function frameModeration(
       avgScore,
       totalVideoScore,
       totalFrames,
-      frameResults,
+      frameResults: [],
       metrics: {
         flaggedFrames,
         highSeverityFrames,
@@ -250,7 +270,7 @@ export async function frameModeration(
     avgScore,
     totalVideoScore,
     totalFrames,
-    frameResults,
+    frameResults: [],
     metrics: {
       flaggedFrames,
       highSeverityFrames,

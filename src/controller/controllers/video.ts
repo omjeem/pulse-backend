@@ -5,6 +5,8 @@ import fs from "fs";
 import fsp from "fs/promises";
 import path from "path";
 import Constants from "../../config/constants";
+import { emitToRoom } from "../../socket";
+const EVENTS = Constants.EVENTS;
 
 const initiateDownload = async (req: Request, res: Response) => {
   try {
@@ -28,7 +30,7 @@ const initiateDownload = async (req: Request, res: Response) => {
     };
 
     const videoInit = await services.video.initiateVideoUpload(videoObj);
-
+    emitToRoom("", EVENTS.initateDownload, { message: "Initiation Start" });
     return successResponse(
       res,
       "Video download initiate successfully",
@@ -43,13 +45,23 @@ const uploadInChunk = async (req: Request, res: Response) => {
   try {
     const body = req.body;
     const file = req.file;
-    const { videoId, chunkIndex } = body;
+    const { videoId, chunkIndex, totalChunks } = body;
     const targetPath = `${videoId}::${chunkIndex}`;
 
     fs.rename(file?.path!, `${file?.destination}/${targetPath}`, (err) => {
       if (err) {
         console.log("Error in rename", err);
       }
+    });
+
+    emitToRoom("", EVENTS.chunkUpload, {
+      chunkIndex,
+      videoId,
+      totalChunks,
+      percentage: (
+        ((parseInt(chunkIndex) + 1) / parseInt(totalChunks)) *
+        100
+      ).toFixed(2),
     });
 
     console.log({ body, file });
@@ -66,6 +78,7 @@ export const completeUpload = async (req: Request, res: Response) => {
     if (!videoId) {
       return res.status(400).json({ ok: false });
     }
+    emitToRoom("", EVENTS.clubbingStart, { videoId });
 
     const parts = (await fsp.readdir(Constants.TEMP_DIR))
       .filter((f) => f.startsWith(`${videoId}::`))
@@ -108,6 +121,7 @@ export const completeUpload = async (req: Request, res: Response) => {
 
     const stats = await fsp.stat(finalPath);
     console.log({ stats, finalPath });
+    emitToRoom("", EVENTS.clubbingComplete, { videoId, finalPath });
 
     return successResponse(res, "Video Clubbed Successfully", {
       filePath: finalPath,
@@ -125,9 +139,17 @@ const framesAnalysis = async (req: Request, res: Response) => {
     const files: any = req.files;
     const { videoId } = body;
     const framesPath = files?.map((f: any) => f.path);
+    emitToRoom("", EVENTS.frameAnalysis, {
+      videoId,
+      totalFrames: framesPath.length,
+    });
     const framesModeration = await services.moderation.frameModeration(
-      framesPath
+      framesPath,
+      videoId
     );
+    emitToRoom("", EVENTS.frameAnalysisComplete, {
+      framesModeration,
+    });
     console.log({ framesModeration });
     return res.json({
       message: "ok",
