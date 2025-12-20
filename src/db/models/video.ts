@@ -20,14 +20,7 @@ const VideoSchema = new mongoose.Schema({
     receivedChunks: { type: Number, default: 0 }
   },
 
-  visibility: { type: String, enum: ['private','team','tenant','public'], default: 'private', index: true },
-
-  sharedWithUsers: [{
-    userId: { type: Types.ObjectId },
-    roleAllowed: { type: String, enum: ['viewer','editor'], default: 'viewer' }
-  }],
-
-  sharedWithTeams: [{ type: Types.ObjectId }], 
+  visibility: { type: String, enum: ['private','tenant','public'], default: 'private', index: true },
 
   status: { type: String, enum: ['uploading','assembled','processing','processed','failed'], default: 'uploading', index: true },
   progress: { type: Number, default: 0 },

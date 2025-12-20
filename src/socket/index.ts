@@ -1,10 +1,11 @@
 import { Server } from "socket.io";
 import services from "../services";
+import Constants from "../config/constants";
 
 let io: Server | null = null;
-
+const EVENTS = Constants.EVENTS;
 export function initSocket(server: any) {
-  if (io) return io; 
+  if (io) return io;
 
   io = new Server(server, {
     cors: { origin: "*", methods: ["GET", "POST"] },
@@ -32,9 +33,18 @@ export function initSocket(server: any) {
     //   socket.join(String(socket.data.userId));
     // }
 
-    socket.on("join-room", (roomId) => {
-      console.log("join-room", roomId);
-      socket.join(roomId.tenantId)
+    socket.on(EVENTS.joinRoom, (room) => {
+
+      const newRoomId = String(room);
+
+      for (const roomId of socket.rooms) {
+        if (roomId !== socket.id) {
+          socket.leave(roomId);
+          console.log(`left room: ${roomId}`);
+        }
+      }
+      socket.join(newRoomId);
+      console.log(`joined room: ${newRoomId}`);
     });
 
     socket.on("disconnect", () => {

@@ -14,8 +14,6 @@ const MembershipSchema = new mongoose.Schema({
     required: true,
   },
 
-  teams: [{ type: Types.ObjectId, ref: "Team" }],
-
   status: {
     type: String,
     enum: ["active", "invited", "suspended"],

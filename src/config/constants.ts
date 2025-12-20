@@ -15,7 +15,8 @@ const Constants = {
     clubbingComplete : "video.clubbing.complete",
     frameAnalysis : "video.frames.analysis.start",
     frameAnalysisProgress : "video.frames.analysis.progress",
-    frameAnalysisComplete : "video.frames.analysis.complete"
+    frameAnalysisComplete : "video.frames.analysis.complete",
+    joinRoom : "room.join"
   }
 };
 

@@ -17,10 +17,15 @@ const findByUserId = async (userId: Types.ObjectId) => {
   return await UserModal.findById(userId).select("_id name email createdAt");
 };
 
+const getAllUsers = async () => {
+  return await UserModal.find().select("_id name email createdAt");
+};
+
 const user = {
   createUser,
   findByEmail,
-  findByUserId
+  findByUserId,
+  getAllUsers,
 };
 
 export default user;

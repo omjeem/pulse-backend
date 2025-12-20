@@ -30,7 +30,6 @@ const createNew = async (
           userId,
           tenantId: tenant!._id,
           role: "owner",
-          teams: [],
         },
       ],
       { session }
@@ -53,17 +52,30 @@ const getAllUserTenant = async (userId: Types.ObjectId) => {
   });
 };
 
-const isUserBelongToTenant = async (
+const getTenantMemberInfo = async (
   userId: Types.ObjectId,
   tenantId: Types.ObjectId
 ) => {
   return await MembershipModal.find({ tenantId, userId });
 };
 
+const addNewMembers = async (users: any) => {
+  return await MembershipModal.create(users);
+};
+
+const getAllTenantMembers = async (tenantId: Types.ObjectId) => {
+  return await MembershipModal.find({ tenantId }).populate({
+    path: "userId",
+    select : "_id name email"
+  }).select("_id role status createdAt");
+};
+
 const tenant = {
   createNew,
   getAllUserTenant,
-  isUserBelongToTenant,
+  getTenantMemberInfo,
+  addNewMembers,
+  getAllTenantMembers,
 };
 
 export default tenant;

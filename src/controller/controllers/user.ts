@@ -11,10 +11,11 @@ const create = async (req: Request, res: Response) => {
     const token = await services.jwtService.generateJwt(email, user._id);
     return successResponse(res, "User created Successfully", { token });
   } catch (error: any) {
-    console.log({error})
-    let message = error.message
-    if(error.code === 11000){
-      message = "User with this email already registered! please try with different one"
+    console.log({ error });
+    let message = error.message;
+    if (error.code === 11000) {
+      message =
+        "User with this email already registered! please try with different one";
     }
     return errorResponse(res, message);
   }
@@ -60,10 +61,20 @@ const profileDetails = async (req: Request, res: Response) => {
     return errorResponse(res, error.message);
   }
 };
+
+const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await services.user.getAllUsers();
+    return successResponse(res, "All users fetched Successfully", users);
+  } catch (error: any) {
+    return errorResponse(res, error.message);
+  }
+};
 const user = {
   create,
   login,
   profileDetails,
+  getAllUsers,
 };
 
 export default user;
