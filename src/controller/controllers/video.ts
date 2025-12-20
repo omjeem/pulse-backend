@@ -30,7 +30,9 @@ const initiateDownload = async (req: Request, res: Response) => {
     };
 
     const videoInit = await services.video.initiateVideoUpload(videoObj);
-    emitToRoom("", EVENTS.initateDownload, { message: "Initiation Start" });
+    emitToRoom(tenantId, EVENTS.initateDownload, {
+      message: "Initiation Start",
+    });
     return successResponse(
       res,
       "Video download initiate successfully",
@@ -45,7 +47,7 @@ const uploadInChunk = async (req: Request, res: Response) => {
   try {
     const body = req.body;
     const file = req.file;
-    const { videoId, chunkIndex, totalChunks } = body;
+    const { videoId, chunkIndex, totalChunks, tenantId } = body;
     const targetPath = `${videoId}::${chunkIndex}`;
 
     fs.rename(file?.path!, `${file?.destination}/${targetPath}`, (err) => {
@@ -54,7 +56,7 @@ const uploadInChunk = async (req: Request, res: Response) => {
       }
     });
 
-    emitToRoom("", EVENTS.chunkUpload, {
+    emitToRoom(tenantId, EVENTS.chunkUpload, {
       chunkIndex,
       videoId,
       totalChunks,
@@ -64,7 +66,7 @@ const uploadInChunk = async (req: Request, res: Response) => {
       ).toFixed(2),
     });
 
-    console.log({ body, file });
+    // console.log({ body, file });
 
     return successResponse(res, "Chunk uoloaded successfully", null);
   } catch (error: any) {
@@ -74,11 +76,11 @@ const uploadInChunk = async (req: Request, res: Response) => {
 
 export const completeUpload = async (req: Request, res: Response) => {
   try {
-    const { videoId } = req.body;
+    const { videoId, tenantId } = req.body;
     if (!videoId) {
       return res.status(400).json({ ok: false });
     }
-    emitToRoom("", EVENTS.clubbingStart, { videoId });
+    emitToRoom(tenantId, EVENTS.clubbingStart, { videoId });
 
     const parts = (await fsp.readdir(Constants.TEMP_DIR))
       .filter((f) => f.startsWith(`${videoId}::`))
@@ -120,8 +122,9 @@ export const completeUpload = async (req: Request, res: Response) => {
     );
 
     const stats = await fsp.stat(finalPath);
-    console.log({ stats, finalPath });
-    emitToRoom("", EVENTS.clubbingComplete, { videoId, finalPath });
+    // console.log({ stats, finalPath });
+    emitToRoom(tenantId, EVENTS.clubbingComplete, { videoId, finalPath });
+    await services.video.updateVideodata(videoId, { filePath: finalPath });
 
     return successResponse(res, "Video Clubbed Successfully", {
       filePath: finalPath,
@@ -137,19 +140,29 @@ const framesAnalysis = async (req: Request, res: Response) => {
   try {
     const body = req.body;
     const files: any = req.files;
-    const { videoId } = body;
+    const { videoId, tenantId } = body;
     const framesPath = files?.map((f: any) => f.path);
-    emitToRoom("", EVENTS.frameAnalysis, {
+    emitToRoom(tenantId, EVENTS.frameAnalysis, {
       videoId,
       totalFrames: framesPath.length,
     });
     const framesModeration = await services.moderation.frameModeration(
       framesPath,
-      videoId
+      videoId,
+      tenantId
     );
-    emitToRoom("", EVENTS.frameAnalysisComplete, {
+    emitToRoom(tenantId, EVENTS.frameAnalysisComplete, {
       framesModeration,
+      videoId,
     });
+    const { flagged } = framesModeration;
+    console.log({ flagged });
+    if (framesModeration.reason) {
+      const update = await services.video.updateVideodata(videoId, {
+        flags: [framesModeration.reason],
+      });
+      console.log({ update });
+    }
     console.log({ framesModeration });
     return res.json({
       message: "ok",
@@ -161,11 +174,26 @@ const framesAnalysis = async (req: Request, res: Response) => {
   }
 };
 
+const getAllVideoInfoOfTenant = async (req: Request, res: Response) => {
+  try {
+    const { tenantId }: any = req.params;
+    const videos = await services.video.getAllVideos(tenantId);
+    return successResponse(
+      res,
+      "All Videos of Tenant Fetched Successfully",
+      videos
+    );
+  } catch (error: any) {
+    return errorResponse(res, error.message);
+  }
+};
+
 const video = {
   initiateDownload,
   uploadInChunk,
   completeUpload,
   framesAnalysis,
+  getAllVideoInfoOfTenant,
 };
 
 export default video;

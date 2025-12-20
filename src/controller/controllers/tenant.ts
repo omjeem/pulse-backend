@@ -71,7 +71,7 @@ const addNewMember = async (req: Request, res: Response) => {
         invitedBy: userId,
       };
     });
-    console.log({ addUsersPayLoad });
+    // console.log({ addUsersPayLoad });
     const addUsers = await services.tenant.addNewMembers(addUsersPayLoad);
     return successResponse(res, "All members created successfully!", addUsers);
   } catch (error: any) {

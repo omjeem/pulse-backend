@@ -2,11 +2,9 @@ import fs from "fs";
 import * as tf from "@tensorflow/tfjs-node";
 import * as nsfw from "nsfwjs";
 import Tesseract from "tesseract.js";
-import { Filter } from "bad-words";
 import { emitToRoom } from "../../socket";
 import Constants from "../../config/constants";
 
-const profanity = new Filter();
 
 let nsfwModel: any = null;
 
@@ -84,7 +82,8 @@ function isMeaningfulText(s: string) {
 
 export async function frameModeration(
   framePaths: string[],
-  videoId: string
+  videoId: string,
+  tenantId: string
 ): Promise<ModerationOutcome> {
   if (!framePaths || framePaths.length === 0) {
     return {
@@ -118,7 +117,7 @@ export async function frameModeration(
   for (const framePath of framePaths) {
     i++;
     if (i === nextEmit) {
-      emitToRoom("", Constants.EVENTS.frameAnalysisProgress, {
+      emitToRoom(tenantId, Constants.EVENTS.frameAnalysisProgress, {
         totalFrames: framePaths.length,
         videoId,
         percentage: ((i / framePaths.length) * 100).toFixed(2),
@@ -154,6 +153,8 @@ export async function frameModeration(
 
       const cleaned = normalizeOCR(rawOcr);
       const meaningful = isMeaningfulText(cleaned);
+      const { Filter } = await import("bad-words");
+      const profanity = new Filter()
       const ocrProfane = meaningful && profanity.isProfane(cleaned);
       const ocrFlag = Boolean(ocrProfane && meaningful);
       const ocrScore = ocrFlag ? OCR_FRAME_BONUS : 0;
@@ -183,7 +184,7 @@ export async function frameModeration(
     }
   }
 
-  emitToRoom("", Constants.EVENTS.frameAnalysisProgress, {
+  emitToRoom(tenantId, Constants.EVENTS.frameAnalysisProgress, {
     totalFrames: framePaths.length,
     videoId,
     percentage: 100,

@@ -57,5 +57,5 @@ export function initSocket(server: any) {
 
 export function emitToRoom(roomId: string, event: string, payload: any) {
   if (!io) throw new Error("Socket not initialized");
-  io.to(String("6943d928613c4159f0ede227")).emit(event, payload);
+  io.to(String(roomId)).emit(event, payload);
 }

@@ -21,7 +21,7 @@ function run(cmd: string, args: string[]) {
 
 export async function normalizeMp4Video(inputPath: string): Promise<string> {
   const outputPath = inputPath.replace(/\.mp4$/, "") + ".final.mp4";
-  console.log({ outputPath, inputPath });
+  // console.log({ outputPath, inputPath });
 
   const transcode = await run(ffmpegPath!, [
     "-y",

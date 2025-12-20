@@ -6,6 +6,8 @@ import { upload } from "../../config/multer";
 const videoRouter = express.Router();
 videoRouter.use(authMiddleware);
 
+videoRouter.get("/:tenantId", controllers.video.getAllVideoInfoOfTenant)
+
 videoRouter.post("/init", controllers.video.initiateDownload);
 
 videoRouter.post(
