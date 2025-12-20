@@ -35,7 +35,7 @@ const getAllTenantteam = async (req: Request, res: Response) => {
       tenantId
     );
     if (!isBelongs || isBelongs.length === 0) {
-      throw new Error("Tenant not exists or not belong to you");
+      return successResponse(res, "Team Created Successfully", []);
     }
     const userRole = isBelongs[0]?.role;
     if (userRole === "viewer") {
@@ -51,7 +51,7 @@ const getAllTenantteam = async (req: Request, res: Response) => {
 
 const team = {
   createNew,
-  getAllTenantteam
+  getAllTenantteam,
 };
 
 export default team;
