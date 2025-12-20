@@ -14,9 +14,9 @@ app.get("/", (_req, res) => res.json({ message: "Welcome to pulse api!" }));
 app.use("/api", mainRouter);
 
 const server = http.createServer(app);
-initSocket(server)
+initSocket(server);
 
-server.listen(envConfigs.port, async () => {
+server.listen(envConfigs.port, "0.0.0.0", async () => {
   console.log(`Server is listening on http://localhost:${envConfigs.port}`);
   await connectMongoDb();
 });
