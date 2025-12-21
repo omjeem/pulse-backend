@@ -18,10 +18,15 @@ const updateVideodata = async (videoId: Types.ObjectId, body: any) => {
   return await VideoModal.updateOne({ _id: videoId }, body);
 };
 
+const getVideoInfo = async (query: any) => {
+  return await VideoModal.find(query);
+};
+
 const video = {
   initiateVideoUpload,
   getAllVideos,
-  updateVideodata
+  updateVideodata,
+  getVideoInfo
 };
 
 export default video;

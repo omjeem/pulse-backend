@@ -80,6 +80,7 @@ export const completeUpload = async (req: Request, res: Response) => {
     if (!videoId) {
       return res.status(400).json({ ok: false });
     }
+    console.log(req.body);
     emitToRoom(tenantId, EVENTS.clubbingStart, { videoId });
 
     const parts = (await fsp.readdir(Constants.TEMP_DIR))
@@ -94,10 +95,13 @@ export const completeUpload = async (req: Request, res: Response) => {
       return res.status(400).json({ ok: false, message: "No chunks found" });
     }
 
-    const finalPath = path.join(
-      Constants.FINAL_DIR,
-      `${videoId}-${Date.now()}-random.mp4`
-    );
+    const tenantDir = path.join(Constants.FINAL_DIR, tenantId);
+
+    if (!fs.existsSync(tenantDir)) {
+      fs.mkdirSync(tenantDir, { recursive: true });
+    }
+
+    const finalPath = path.join(tenantDir, `${videoId}.mp4`);
 
     const writeStream = fs.createWriteStream(finalPath);
 
@@ -188,12 +192,71 @@ const getAllVideoInfoOfTenant = async (req: Request, res: Response) => {
   }
 };
 
+const streamVideo = async (req: Request, res: Response) => {
+  try {
+    const { tenantId, videoId }: any = req.params;
+
+    console.log(req.body);
+    const isVideoExists = await services.video.getVideoInfo({
+      tenantId,
+      _id: videoId,
+    });
+
+    if (!isVideoExists || isVideoExists.length === 0 || !isVideoExists[0]) {
+      throw new Error("Video not found");
+    }
+    const videoData = isVideoExists[0];
+
+    const videoPath = path.join(
+      process.cwd(),
+      "dist_uploads/videos",
+      `${tenantId}/${videoId}.mp4`
+    );
+    console.log({ videoPath });
+    if (!fs.existsSync(videoPath)) {
+      throw new Error("File not found on disk");
+    }
+
+    const stat = fs.statSync(videoPath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+    if (!range) {
+      return res.status(416).send("Range header required");
+    }
+
+    console.log({ range });
+    const parts = range.replace(/bytes=/, "").split("-");
+    if (!Array.isArray(parts) || parts.length !== 2) {
+      throw new Error("Invalid range defined");
+    }
+    console.log({ parts });
+    const start = parseInt(String(parts[0]), 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+    const chunkSize = end - start + 1;
+
+    const file = fs.createReadStream(videoPath, { start, end });
+
+    res.writeHead(206, {
+      "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+      "Accept-Ranges": "bytes",
+      "Content-Length": chunkSize,
+      "Content-Type": videoData.mimeType || "video/mp4",
+    });
+
+    file.pipe(res);
+  } catch (error: any) {
+    return errorResponse(res, error.message);
+  }
+};
+
 const video = {
   initiateDownload,
   uploadInChunk,
   completeUpload,
   framesAnalysis,
   getAllVideoInfoOfTenant,
+  streamVideo,
 };
 
 export default video;
