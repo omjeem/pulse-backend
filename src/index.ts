@@ -16,7 +16,9 @@ app.use("/api", mainRouter);
 const server = http.createServer(app);
 initSocket(server);
 
-server.listen(4000, "0.0.0.0", async () => {
-  console.log(`Server is listening on http://localhost:${envConfigs.port}`);
+const PORT = process.env.PORT || 4000;
+
+server.listen(PORT, async () => {
+  console.log(`Server is listening on http://localhost:${PORT}`);
   await connectMongoDb();
 });
