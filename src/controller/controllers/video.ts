@@ -11,9 +11,9 @@ const EVENTS = Constants.EVENTS;
 const initiateDownload = async (req: Request, res: Response) => {
   try {
     const userId = req.user.userId;
-
-    const { tenantId, originalFilename, mimeType, size, totalChunks } =
-      req.body;
+    const { tenantId }: any = req.params;
+    console.log({userId, tenantId})
+    const { originalFilename, mimeType, size, totalChunks } = req.body;
 
     const videoObj = {
       tenantId,
@@ -246,7 +246,7 @@ const streamVideo = async (req: Request, res: Response) => {
 
     file.pipe(res);
   } catch (error: any) {
-    return errorResponse(res, error.message);
+    return res.status(400).end();
   }
 };
 

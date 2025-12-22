@@ -42,17 +42,6 @@ const addNewMember = async (req: Request, res: Response) => {
       role: string;
     }[] = req.body;
 
-    const membershipInfo = await services.tenant.getTenantMemberInfo(
-      userId,
-      tenantId
-    );
-    if (!membershipInfo || membershipInfo.length === 0) {
-      throw new Error("You are not associated with this Organization/Tenant");
-    }
-    const userRole = membershipInfo[0]?.role;
-    if (userRole === "editor" || userRole === "viewer") {
-      throw new Error(`You have ${userRole} role! you cannot add members!`);
-    }
     users.forEach((u) => {
       if (u.role === "owner") {
         throw new Error("There Cannot be multiple owner of the Organization!");

@@ -2,6 +2,7 @@ import express from "express";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import controllers from "../../controller";
 import { upload } from "../../config/multer";
+import { adminOwnerMiddleware } from "../../middlewares/adminOwnerMiddleware";
 
 const videoRouter = express.Router();
 
@@ -13,7 +14,12 @@ videoRouter.get(
   controllers.video.getAllVideoInfoOfTenant
 );
 
-videoRouter.post("/init", authMiddleware, controllers.video.initiateDownload);
+videoRouter.post(
+  `/init/:tenantId`,
+  authMiddleware,
+  adminOwnerMiddleware,
+  controllers.video.initiateDownload
+);
 
 videoRouter.post(
   "/upload/chunk",
